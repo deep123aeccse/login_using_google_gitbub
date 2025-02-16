@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+// Get backend URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 export const loginWithGoogle = () => {
   window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
