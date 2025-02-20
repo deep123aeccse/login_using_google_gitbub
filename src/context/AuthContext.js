@@ -1,31 +1,35 @@
-import React, { createContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { fetchUser } from "../services/auth";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Check localStorage/sessionStorage to persist login state
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const getUser = async () => {
+      const userData = await fetchUser();
+      setUser(userData);
+      setLoading(false);
+    };
+    getUser();
   }, []);
 
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
+  const logout = async () => {
+    try {
+      await fetch("https://gitgoogleloginbackend-production.up.railway.app/auth/app/logout", { credentials: "include" });
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);
